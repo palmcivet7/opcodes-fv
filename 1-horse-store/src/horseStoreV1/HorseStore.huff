@@ -1,0 +1,110 @@
+// send calldata -> function dispatch -> function
+
+// 60008060093d393df3 -> Contract Creation Bytecode
+// xxx??              ->  Runtime Code
+
+/* Interface */
+#define function updateHorseNumber(uint256) nonpayable returns()
+#define function readNumberOfHorses() view returns(uint256)
+
+#define constant NUMBER_OF_HORSES_STORAGE_SLOT = FREE_STORAGE_POINTER() // storage slot 0
+
+#define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xe0 shr         
+    dup1 __FUNC_SIG(updateHorseNumber) eq updateJump jumpi
+    __FUNC_SIG(readNumberOfHorses) eq readJump jumpi
+    0x00 0x00 revert
+
+    updateJump:
+        SET_NUMBER_OF_HORSES()
+    readJump:
+        GET_NUMBER_OF_HORSES()
+}
+
+// 0xcdfead2e0000000000000000000000000000000000000000000000000000000000000007
+#define macro SET_NUMBER_OF_HORSES() = takes(0) returns(0){
+                                                // [func_selector]
+    // 2. get the value to store from calldata  
+    0x04                                        // [4, func_selector]
+    calldataload                                // [value, func_selector]
+    // 1. give it storage slot
+    [NUMBER_OF_HORSES_STORAGE_SLOT]             // [storage_slot, value, func_selector]
+    // 3. sstore opcode
+    sstore
+    stop
+}
+
+#define macro GET_NUMBER_OF_HORSES() = takes(0) returns(0){
+    // 1. get the storage slot
+    // 2. load the value of that slot into memory
+    // 3. return
+    [NUMBER_OF_HORSES_STORAGE_SLOT]             // [key]
+    sload                                       // [value]
+    0x00                                        // [0, value]
+    mstore                                      // []           // memory: [value]
+    // 0x20 == 32 bytes
+    0x20 0x00 return                            // []
+}
+
+    // How do we cut down the calldata -> func selector?
+    // SHR opcode
+    // 0x0102 (bytes)
+    // 1 bytes = 8 bits
+    // cast --to-base 0x0102 bin
+    // 0b100000010 bits
+    // cast --to-base 0x0102 dec
+    // cast --to-base 0x0102 hex
+    // 0b100000010 bits this is the value we want to shift
+    // 0b100000010 bits >> 2
+    //  0b01000000
+
+
+    // 0x00                // [0]
+    // // 0x02             // TOP [2, 0] BOTTOM
+    // calldataload        // [calldata (32bytes)]
+    // // How do we cut down the calldata -> func selector?
+    // // 64 / 2 = 32 bytes -> right
+    // // We need to right shift 28 bytes, or 28 * 8, 224 bits
+    // // cast to-base 224 hex
+    // 0xe0                // [0xe0,calldata (32bytes)]
+    // shr                 // [function_selector]
+    // // Jump -> function data associated with the selector
+    // // if func-selector == updateHorseNumber -> jump to that code // 0xcdfead2e // updateHorseNumber(uint256)
+    // // if func-selector == readHorseNumber -> jump to that code // 0xe026c017 // readNumberOfHorses()
+    // dup1                // [function_selector, function_selector]
+    // 0xcdfead2e          // [0xcdfead2e, function_selector, function_selector]
+    // eq                  // [true_if_func_selector_matches, function_selector]
+    // // jump to updateHorseNumber
+    // updateJump          // [updateHorseNumberProgramCounter, true_if_func_selector_matches, function_selector]
+    // jumpi               // [function_selector]
+    // 0xe026c017          // [0xe026c017, function_selector]
+    // eq                  // [true_if_func_selector_matches]
+    // readJump            // [readJump, true_if_func_selector_matches]
+    // jumpi               // []
+    // 0x00 0x00 revert    // [0, 0, revert]
+
+    // updateJump:
+    //     SET_NUMBER_OF_HORSES()
+    // readJump:
+    //     GET_NUMBER_OF_HORSES()
+
+
+    // 0x00                // [0]
+    // calldataload        // [calldata (32bytes)]
+    // 0xe0                // [0xe0,calldata (32bytes)]
+    // shr                 // [function_selector]
+    // dup1                // [function_selector, function_selector]
+    // 0xcdfead2e          // [0xcdfead2e, function_selector, function_selector]
+    // eq                  // [true_if_func_selector_matches, function_selector]
+    // updateJump          // [updateHorseNumberProgramCounter, true_if_func_selector_matches, function_selector]
+    // jumpi               // [function_selector]
+    // 0xe026c017          // [0xe026c017, function_selector]
+    // eq                  // [true_if_func_selector_matches]
+    // readJump            // [readJump, true_if_func_selector_matches]
+    // jumpi               // []
+    // 0x00 0x00 revert    // [0, 0, revert]
+
+    // updateJump:
+    //     SET_NUMBER_OF_HORSES()
+    // readJump:
+    //     GET_NUMBER_OF_HORSES()
