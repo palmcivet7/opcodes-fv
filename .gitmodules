@@ -10,3 +10,6 @@
 [submodule "1-horse-store/lib/huffmate"]
 	path = 1-horse-store/lib/huffmate
 	url = https://github.com/huff-language/huffmate
+[submodule "2-math-master-audit/lib/forge-std"]
+	path = 2-math-master-audit/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
