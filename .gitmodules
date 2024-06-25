@@ -13,3 +13,9 @@
 [submodule "2-math-master-audit/lib/forge-std"]
 	path = 2-math-master-audit/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "3-gas-bad-nft-marketplace-audit/lib/forge-std"]
+	path = 3-gas-bad-nft-marketplace-audit/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "3-gas-bad-nft-marketplace-audit/lib/openzeppelin-contracts"]
+	path = 3-gas-bad-nft-marketplace-audit/lib/openzeppelin-contracts
+	url = https://github.com/openzeppelin/openzeppelin-contracts
